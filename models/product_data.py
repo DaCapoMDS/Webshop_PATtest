@@ -1,4 +1,4 @@
-from product import Product
+from .product import Product
 
 # Initial product catalog
 products = [
@@ -74,15 +74,6 @@ products = [
     Product(id=70, name="Lemongrass Lime Iced Tea", description="Zesty iced tea with fresh lemongrass and lime flavors", price=5.49, image_url="lemongrass_lime_iced_tea.jpg", category="Cold Beverages"),
 ]
 
-# Convert dictionary products to Product instances
-products = [Product(
-    id=p['id'],
-    name=p['name'],
-    description=p['description'],
-    price=p['price'],
-    image_url=p['image_url'],
-    category=p['category']
-) for p in products]
 
 def get_all_products():
     """Return all products"""

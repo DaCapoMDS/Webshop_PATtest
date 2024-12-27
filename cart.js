@@ -2,6 +2,7 @@ class Cart {
     constructor() {
         this.items = JSON.parse(localStorage.getItem('cart')) || [];
         this.updateCartCount();
+        this.updateCartUI();
     }
 
     addItem(product) {

@@ -35,20 +35,20 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal</span>
-                            <span id="subtotal">$0.00</span>
+                            <span id="subtotal">€0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Shipping</span>
-                            <span id="shipping">$5.00</span>
+                            <span id="shipping">€5.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tax (10%)</span>
-                            <span id="tax">$0.00</span>
+                            <span id="tax">€0.00</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
                             <strong>Total</strong>
-                            <strong id="total">$0.00</strong>
+                            <strong id="total">€0.00</strong>
                         </div>
                     </div>
                 </div>
@@ -86,9 +86,9 @@
                             <label for="country" class="form-label">Country</label>
                             <select class="form-select" id="country" required>
                                 <option value="">Choose...</option>
-                                <option value="IN">India</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
+                                <option value="AT">Austria</option>
+                                <option value="DE">Germany</option>
+                                <option value="CH">Switzerland</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -103,30 +103,15 @@
 
                     <hr class="my-4">
 
-                    <!-- Payment Information -->
-                    <h4 class="mb-3">Payment Information</h4>
-                    <div class="mb-3">
-                        <label for="cardName" class="form-label">Name on Card</label>
-                        <input type="text" class="form-control" id="cardName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cardNumber" class="form-label">Card Number</label>
-                        <input type="text" class="form-control" id="cardNumber" required pattern="[0-9]{16}" title="Please enter a valid 16-digit card number">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="expiry" class="form-label">Expiry Date</label>
-                            <input type="text" class="form-control" id="expiry" placeholder="MM/YY" required pattern="(0[1-9]|1[0-2])\/([0-9]{2})" title="Please enter a valid expiry date (MM/YY)">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="cvv" class="form-label">CVV</label>
-                            <input type="text" class="form-control" id="cvv" required pattern="[0-9]{3,4}" title="Please enter a valid CVV">
+                    <!-- Payment Section -->
+                    <h4 class="mb-3">Payment</h4>
+                    <div class="mx-auto" style="max-width: 750px;">
+                        <div id="paypal-button-container" class="mb-3"></div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Secure payment processing via PayPal. You can pay with PayPal, credit/debit card, or EPS.
                         </div>
                     </div>
-
-                    <hr class="my-4">
-
-                    <button class="btn btn-primary btn-lg w-100" type="submit">Place Order</button>
                 </form>
             </div>
         </div>
@@ -134,6 +119,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=EUR"></script>
     
     <!-- Scripts -->
     <script src="cart.js"></script>
@@ -155,7 +143,7 @@
             orderItems.innerHTML = cartItems.map(item => `
                 <div class="d-flex justify-content-between mb-2">
                     <span>${item.name} × ${item.quantity}</span>
-                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>€${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
             `).join('');
             
@@ -166,92 +154,73 @@
             const total = subtotal + shipping + tax;
             
             // Update display
-            subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-            taxElement.textContent = `$${tax.toFixed(2)}`;
-            totalElement.textContent = `$${total.toFixed(2)}`;
+            subtotalElement.textContent = `€${subtotal.toFixed(2)}`;
+            taxElement.textContent = `€${tax.toFixed(2)}`;
+            totalElement.textContent = `€${total.toFixed(2)}`;
         }
 
-        // Handle form submission
-        async function handleSubmit(event) {
+        // Prevent form submission as we're using PayPal buttons
+        function handleSubmit(event) {
             event.preventDefault();
-            
-            // Disable submit button and show loading state
-            const submitButton = event.target.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-            
-            try {
-                // Get form data
-                const formData = {
-                    shipping: {
-                        firstName: document.getElementById('firstName').value,
-                        lastName: document.getElementById('lastName').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        address: document.getElementById('address').value,
-                        country: document.getElementById('country').value,
-                        state: document.getElementById('state').value,
-                        zip: document.getElementById('zip').value
-                    },
-                    payment: {
-                        cardName: document.getElementById('cardName').value,
-                        cardNumber: document.getElementById('cardNumber').value,
-                        expiry: document.getElementById('expiry').value,
-                        cvv: document.getElementById('cvv').value
-                    },
-                    order: {
-                        items: cart.items,
-                        subtotal: cart.getTotal(),
-                        shipping: 5.00,
-                        tax: cart.getTotal() * 0.10,
-                        total: cart.getTotal() + 5.00 + (cart.getTotal() * 0.10)
-                    }
-                };
-
-                // Create order in order manager
-                const order = await orderManager.createOrder(formData);
-
-                // Clear cart
-                localStorage.removeItem('cart');
-
-                // Redirect to confirmation page with order ID
-                window.location.href = `confirmation.html?orderId=${order.id}`;
-            } catch (error) {
-                console.error('Failed to create order:', error);
-                alert('Sorry, there was an error processing your order. Please try again.');
-                
-                // Reset submit button
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalText;
-            }
+            return false;
         }
 
-        // Format card number input
-        document.getElementById('cardNumber').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 16) value = value.slice(0, 16);
-            e.target.value = value;
-        });
+        // Initialize PayPal button with all payment options
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                const total = cart.getTotal() + 5.00 + (cart.getTotal() * 0.10);
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: total.toFixed(2),
+                            currency_code: 'EUR'
+                        }
+                    }]
+                });
+            },
+            onApprove: async function(data, actions) {
+                try {
+                    await actions.order.capture();
+                    const formData = {
+                        shipping: {
+                            firstName: document.getElementById('firstName').value,
+                            lastName: document.getElementById('lastName').value,
+                            email: document.getElementById('email').value,
+                            phone: document.getElementById('phone').value,
+                            address: document.getElementById('address').value,
+                            country: document.getElementById('country').value,
+                            state: document.getElementById('state').value,
+                            zip: document.getElementById('zip').value
+                        },
+                        payment: {
+                            method: 'paypal',
+                            paypalOrderId: data.orderID
+                        },
+                        order: {
+                            items: cart.items,
+                            subtotal: cart.getTotal(),
+                            shipping: 5.00,
+                            tax: cart.getTotal() * 0.10,
+                            total: cart.getTotal() + 5.00 + (cart.getTotal() * 0.10)
+                        }
+                    };
 
-        // Format expiry date input
-        document.getElementById('expiry').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 4) value = value.slice(0, 4);
-            if (value.length > 2) {
-                value = value.slice(0, 2) + '/' + value.slice(2);
+                    // Create order in order manager
+                    const order = await orderManager.createOrder(formData);
+                    
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    
+                    // Redirect to confirmation page
+                    window.location.href = `confirmation.html?orderId=${order.id}`;
+                } catch (error) {
+                    console.error('PayPal payment failed:', error);
+                    alert('Sorry, there was an error processing your PayPal payment. Please try again.');
+                }
             }
-            e.target.value = value;
-        });
+        }).render('#paypal-button-container');
 
-        // Format CVV input
-        document.getElementById('cvv').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 4) value = value.slice(0, 4);
-            e.target.value = value;
-        });
-
-        // Load order summary when page loads
+        // Load order summary
         loadOrderSummary();
     </script>
 </body>

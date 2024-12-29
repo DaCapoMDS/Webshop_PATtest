@@ -4,7 +4,6 @@ const products = [
     "name": "Masala Chai",
     "description": "Traditional Indian spiced tea blend with cardamom, cinnamon, and ginger",
     "price": 8.99,
-    "image_url": "masala_chai.jpg",
     "category": "Tea"
   },
   {
@@ -12,7 +11,6 @@ const products = [
     "name": "Jasmine Green Tea",
     "description": "Fragrant green tea infused with delicate jasmine blossoms",
     "price": 7.49,
-    "image_url": "jasmine_green_tea.jpg",
     "category": "Tea"
   },
   {
@@ -20,7 +18,6 @@ const products = [
     "name": "Earl Grey",
     "description": "Classic black tea with a hint of bergamot citrus",
     "price": 6.99,
-    "image_url": "earl_grey.jpg",
     "category": "Tea"
   },
   {
@@ -28,7 +25,6 @@ const products = [
     "name": "Matcha Latte Mix",
     "description": "Premium Japanese matcha powder for a creamy latte experience",
     "price": 12.99,
-    "image_url": "matcha_latte.jpg",
     "category": "Tea"
   },
   {
@@ -36,7 +32,6 @@ const products = [
     "name": "Chamomile Herbal Tea",
     "description": "Relaxing caffeine-free blend of chamomile flowers",
     "price": 5.99,
-    "image_url": "chamomile_tea.jpg",
     "category": "Tea"
   },
   {
@@ -44,7 +39,6 @@ const products = [
     "name": "Spicy Hot Chocolate",
     "description": "Rich cocoa mix with a kick of cayenne pepper",
     "price": 10.49,
-    "image_url": "spicy_hot_chocolate.jpg",
     "category": "Hot Beverages"
   },
   {
@@ -52,7 +46,6 @@ const products = [
     "name": "Vanilla Rooibos",
     "description": "Naturally sweet, caffeine-free red tea with a touch of vanilla",
     "price": 7.99,
-    "image_url": "vanilla_rooibos.jpg",
     "category": "Tea"
   },
   {
@@ -60,7 +53,6 @@ const products = [
     "name": "Iced Lemon Green Tea",
     "description": "Refreshing green tea blend with zesty lemon flavor",
     "price": 4.99,
-    "image_url": "iced_lemon_green_tea.jpg",
     "category": "Cold Beverages"
   },
   {
@@ -68,7 +60,6 @@ const products = [
     "name": "Turmeric Ginger Tea",
     "description": "A warm and healing blend of turmeric and ginger",
     "price": 9.49,
-    "image_url": "turmeric_ginger_tea.jpg",
     "category": "Tea"
   },
   {
@@ -76,7 +67,6 @@ const products = [
     "name": "Peppermint Tea",
     "description": "Cool and invigorating caffeine-free peppermint leaves",
     "price": 6.49,
-    "image_url": "peppermint_tea.jpg",
     "category": "Tea"
   },
   {
@@ -84,7 +74,6 @@ const products = [
     "name": "Hibiscus Cooler",
     "description": "Tangy and vibrant iced hibiscus tea, perfect for summer",
     "price": 5.49,
-    "image_url": "hibiscus_cooler.jpg",
     "category": "Cold Beverages"
   },
   {
@@ -92,7 +81,6 @@ const products = [
     "name": "Choco Hazelnut Spread",
     "description": "Decadent chocolate spread with a nutty hazelnut twist",
     "price": 6.99,
-    "image_url": "choco_hazelnut_spread.jpg",
     "category": "Condiments"
   },
   {
@@ -100,7 +88,6 @@ const products = [
     "name": "Mango Peach Iced Tea",
     "description": "A tropical fusion of mango and peach flavors in iced tea",
     "price": 4.79,
-    "image_url": "mango_peach_iced_tea.jpg",
     "category": "Cold Beverages"
   },
   {
@@ -108,7 +95,7 @@ const products = [
     "name": "Honey Lavender Latte",
     "description": "Smooth coffee latte infused with honey and lavender essence",
     "price": 11.49,
-    "image_url": "honey_lavender_latte.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?lavender",
     "category": "Hot Beverages"
   },
   {
@@ -116,7 +103,7 @@ const products = [
     "name": "Oolong Tea",
     "description": "Smooth and aromatic tea with a balance between green and black tea",
     "price": 8.29,
-    "image_url": "oolong_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?oolong",
     "category": "Tea"
   },
   {
@@ -124,7 +111,7 @@ const products = [
     "name": "Golden Milk Blend",
     "description": "A soothing mix of turmeric, cinnamon, and coconut milk powder",
     "price": 9.99,
-    "image_url": "golden_milk_blend.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?golden",
     "category": "Hot Beverages"
   },
   {
@@ -132,7 +119,7 @@ const products = [
     "name": "Coconut Chai",
     "description": "Exotic chai tea blend with creamy coconut flakes",
     "price": 8.99,
-    "image_url": "coconut_chai.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?chai",
     "category": "Tea"
   },
   {
@@ -140,7 +127,7 @@ const products = [
     "name": "Berry Hibiscus Tea",
     "description": "Fruity and refreshing herbal tea with a vibrant red hue",
     "price": 7.49,
-    "image_url": "berry_hibiscus_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?berry",
     "category": "Tea"
   },
   {
@@ -148,7 +135,7 @@ const products = [
     "name": "Caramel Macchiato Mix",
     "description": "Rich caramel flavor for creating creamy macchiatos at home",
     "price": 10.99,
-    "image_url": "caramel_macchiato_mix.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?caramel",
     "category": "Hot Beverages"
   },
   {
@@ -156,7 +143,7 @@ const products = [
     "name": "Lemongrass Ginger Tea",
     "description": "Zesty and revitalizing blend of lemongrass and ginger",
     "price": 6.99,
-    "image_url": "lemongrass_ginger_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?lemongrass",
     "category": "Tea"
   },
   {
@@ -164,7 +151,7 @@ const products = [
     "name": "Raspberry Iced Tea",
     "description": "Sweet and tangy iced tea with real raspberry flavor",
     "price": 5.49,
-    "image_url": "raspberry_iced_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?raspberry",
     "category": "Cold Beverages"
   },
   {
@@ -172,7 +159,7 @@ const products = [
     "name": "French Vanilla Cappuccino",
     "description": "Creamy cappuccino mix with a touch of French vanilla",
     "price": 7.99,
-    "image_url": "french_vanilla_cappuccino.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?vanilla",
     "category": "Hot Beverages"
   },
   {
@@ -180,7 +167,7 @@ const products = [
     "name": "Rose Petal Tea",
     "description": "Delicate floral tea made with handpicked rose petals",
     "price": 8.49,
-    "image_url": "rose_petal_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?rose",
     "category": "Tea"
   },
   {
@@ -188,7 +175,7 @@ const products = [
     "name": "Spiced Apple Cider",
     "description": "Warm cider mix infused with cinnamon and nutmeg",
     "price": 9.49,
-    "image_url": "spiced_apple_cider.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?apple",
     "category": "Hot Beverages"
   },
   {
@@ -196,7 +183,7 @@ const products = [
     "name": "Mint Mojito Iced Tea",
     "description": "Refreshing iced tea with a burst of mint and lime flavors",
     "price": 5.79,
-    "image_url": "mint_mojito_iced_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?mojito",
     "category": "Cold Beverages"
   },
   {
@@ -204,7 +191,7 @@ const products = [
     "name": "Dark Chocolate Bark",
     "description": "Rich dark chocolate with almonds and sea salt",
     "price": 6.49,
-    "image_url": "dark_chocolate_bark.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?dark-chocolate",
     "category": "Snacks"
   },
   {
@@ -212,7 +199,7 @@ const products = [
     "name": "Cranberry Almond Trail Mix",
     "description": "Nutritious snack with almonds, cranberries, and sunflower seeds",
     "price": 4.99,
-    "image_url": "cranberry_almond_trail_mix.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?trail-mix",
     "category": "Snacks"
   },
   {
@@ -220,7 +207,7 @@ const products = [
     "name": "Honey Lemon Tea",
     "description": "Sweet and tangy blend of honey and lemon-infused tea",
     "price": 7.29,
-    "image_url": "honey_lemon_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?honey",
     "category": "Tea"
   },
   {
@@ -228,7 +215,6 @@ const products = [
     "name": "White Peony Tea",
     "description": "Mild and delicate white tea with floral notes",
     "price": 12.99,
-    "image_url": "white_peony_tea.jpg",
     "category": "Tea"
   },
   {
@@ -236,7 +222,7 @@ const products = [
     "name": "Hazelnut Coffee Blend",
     "description": "Aromatic coffee blend with a nutty hazelnut twist",
     "price": 11.49,
-    "image_url": "hazelnut_coffee_blend.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?coffee",
     "category": "Hot Beverages"
   },
   {
@@ -244,7 +230,7 @@ const products = [
     "name": "Cinnamon Apple Tea",
     "description": "Comforting blend of apple pieces and warm cinnamon spice",
     "price": 6.99,
-    "image_url": "cinnamon_apple_tea.jpg",
+    "image_url": "https://source.unsplash.com/random/400x400?cinnamon",
     "category": "Tea"
   },
   {

@@ -1,4 +1,4 @@
-class Cart {
+export class Cart {
     constructor() {
         this.items = JSON.parse(localStorage.getItem('cart')) || [];
         this.updateCartCount();
@@ -99,11 +99,11 @@ class Cart {
                         <p class="text-muted">$${item.price}</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="cart.updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="window.cart.updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
                         <span class="mx-2">${item.quantity}</span>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="cart.updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="window.cart.updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
                     </div>
-                    <button class="btn btn-sm btn-danger" onclick="cart.removeItem(${item.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.cart.removeItem(${item.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -115,6 +115,3 @@ class Cart {
         }
     }
 }
-
-// Initialize cart
-const cart = new Cart();

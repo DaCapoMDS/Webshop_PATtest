@@ -124,11 +124,14 @@
     <script src="https://www.paypal.com/sdk/js?client-id=test&currency=EUR"></script>
     
     <!-- Scripts -->
-    <script src="cart.js"></script>
-    <script src="orders.js"></script>
+    <script type="module">
+        import { Cart } from './js/modules/cart.js';
+        import { OrderManager } from './js/modules/orders.js';
+        
+        // Initialize cart and order manager
+        window.cart = new Cart();
+        window.orderManager = new OrderManager();
 
-    <!-- Checkout Script -->
-    <script>
         // Load order summary
         function loadOrderSummary() {
             const orderItems = document.getElementById('orderItems');
@@ -222,6 +225,9 @@
 
         // Load order summary
         loadOrderSummary();
+
+        // Make handleSubmit available globally
+        window.handleSubmit = handleSubmit;
     </script>
 </body>
 </html>

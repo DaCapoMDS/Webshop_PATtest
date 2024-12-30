@@ -15,18 +15,9 @@ export class OrderManager {
         try {
             // Get current counter from local storage or start from 1
             let orderNumber = 1;
-            try {
-                const storedCounter = localStorage.getItem('orderCounter');
-                if (storedCounter) {
-                    orderNumber = parseInt(storedCounter) + 1;
-                }
-                if (counterResponse.ok) {
-                    const data = await counterResponse.json();
-                    const content = atob(data.content);
-                    orderNumber = parseInt(content.trim()) + 1;
-                }
-            } catch (error) {
-                console.log('Counter not found, starting from 1');
+            const storedCounter = localStorage.getItem('orderCounter');
+            if (storedCounter) {
+                orderNumber = parseInt(storedCounter) + 1;
             }
 
             // Update order with number

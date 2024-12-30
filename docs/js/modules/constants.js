@@ -1,10 +1,7 @@
 // GitHub configuration
 export const GITHUB_CONFIG = {
     OWNER: 'Joppinger',
-    REPO: 'WebShop',
-    // This token only has permissions to create issues
-    // It is public and can be regenerated if needed
-    PUBLIC_TOKEN: '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'
+    REPO: 'WebShop'
 };
 
 // API endpoints

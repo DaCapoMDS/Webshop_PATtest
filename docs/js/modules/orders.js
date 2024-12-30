@@ -22,8 +22,7 @@ export class OrderManager {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop',
-                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
@@ -46,15 +45,14 @@ export class OrderManager {
                 };
             }
 
-            // Also check if we can list issues (needed for order creation)
+            // Check if issues are enabled by trying to list them
             const issuesResponse = await fetch(
                 `${API_ENDPOINTS.GITHUB_REPO}/issues?per_page=1`,
                 {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop',
-                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
@@ -120,7 +118,7 @@ export class OrderManager {
 
         try {
             console.log('Creating order issue...');
-            // Create issue with authentication
+            // Create a public issue (no authentication needed)
             const response = await fetch(
                 `${API_ENDPOINTS.GITHUB_REPO}/issues`,
                 {
@@ -128,8 +126,7 @@ export class OrderManager {
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json',
-                        'User-Agent': 'KochiWebshop',
-                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
+                        'User-Agent': 'KochiWebshop'
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,

@@ -1,8 +1,8 @@
-import { currentFilters, applyPriceFilter, sortProducts, initializeFilters } from '../js/modules/filters.js';
-import { displayProducts, ITEMS_PER_PAGE } from '../js/modules/productDisplay.js';
-import { updatePagination, scrollToTop } from '../js/modules/pagination.js';
-import { products } from '../js/modules/products.js';
-import { Cart } from '../js/modules/cart.js';
+import { currentFilters, applyPriceFilter, sortProducts, initializeFilters } from './modules/filters.js';
+import { displayProducts, ITEMS_PER_PAGE } from './modules/productDisplay.js';
+import { updatePagination, scrollToTop } from './modules/pagination.js';
+import { products } from './modules/products.js';
+import { Cart } from './modules/cart.js';
 
 console.log('Main module loaded');
 console.log('Products loaded:', products);

@@ -1,0 +1,101 @@
+name: Save Order via Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process-order:
+    if: contains(github.event.issue.body, 'ORDER_DATA:')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Validate Order Data
+        id: validate
+        run: |
+          # Extract order data
+          ORDER_DATA=$(echo "${{ github.event.issue.body }}" | sed -n '/ORDER_DATA:/,/END_ORDER_DATA/p' | sed '1d;$d')
+          
+          # Validate JSON format
+          echo "$ORDER_DATA" | jq empty || {
+            echo "::error::Invalid JSON format in order data"
+            exit 1
+          }
+          
+          # Validate required fields
+          echo "$ORDER_DATA" | jq -e '.id' > /dev/null || {
+            echo "::error::Missing order ID"
+            exit 1
+          }
+          echo "$ORDER_DATA" | jq -e '.order.items' > /dev/null || {
+            echo "::error::Missing order items"
+            exit 1
+          }
+          
+          # Store order data for next steps
+          echo "order_data=$ORDER_DATA" >> $GITHUB_ENV
+
+      - name: Process Order
+        if: success()
+        id: process
+        run: |
+          # Get next order number
+          if [ -f "docs/orders/counter.txt" ]; then
+            ORDER_NUMBER=$(($(cat docs/orders/counter.txt) + 1))
+          else
+            ORDER_NUMBER=1
+          fi
+          
+          # Save order data
+          mkdir -p docs/orders
+          echo "$order_data" > "docs/orders/order_${ORDER_NUMBER}.json"
+          echo "$ORDER_NUMBER" > docs/orders/counter.txt
+          
+          # Configure git
+          git config user.name "GitHub Action Bot"
+          git config user.email "actions@github.com"
+          
+          # Commit and push changes
+          git add docs/orders/
+          git commit -m "Save order ${ORDER_NUMBER}"
+          git push
+          
+          # Store order number for next steps
+          echo "order_number=$ORDER_NUMBER" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add Success Comment
+        if: success()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ✅ Order processed successfully!
+            
+            - Order Number: #${{ env.order_number }}
+            - Status: Completed
+            - Files Created:
+              - docs/orders/order_${{ env.order_number }}.json
+            
+            Your order has been saved and will be processed shortly.
+
+      - name: Add Failure Comment
+        if: failure()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ❌ Failed to process order
+            
+            There was an error processing your order. Please contact support for assistance.
+            
+            Error details are available in the GitHub Actions log.
+
+      - name: Close Issue on Success
+        if: success()
+        uses: peter-evans/close-issue@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}

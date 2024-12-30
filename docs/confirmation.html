@@ -53,7 +53,8 @@
         if (currentOrder) {
             const orderInfo = document.getElementById('orderInfo');
             orderInfo.innerHTML = `
-                <p class="mb-1">Order Number: <strong>#${currentOrder.orderNumber}</strong></p>
+                <p class="mb-1">Order Number: <strong>#${currentOrder.issueNumber}</strong></p>
+                <p class="mb-1">Order ID: <strong>${currentOrder.id}</strong></p>
                 <p class="mb-1">Order Status: <strong>${currentOrder.status}</strong></p>
                 <p class="mb-1">Total Amount: <strong>€${currentOrder.total.toFixed(2)}</strong></p>
                 <p>Estimated Delivery: <strong>${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</strong></p>

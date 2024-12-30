@@ -16,7 +16,7 @@ class OrderManager {
             // GitHub API configuration
             const owner = 'Joppinger'; // Repository owner
             const repo = 'Webshop';   // Repository name
-            const token = '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'; // GitHub personal access token
+            const token = 'placeholder'; // GitHub personal access token
             const headers = {
                 'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json'

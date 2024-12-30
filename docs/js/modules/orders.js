@@ -2,9 +2,18 @@ export class OrderManager {
     constructor() {
         // Store only current order in localStorage for customer reference
         this.currentOrder = null;
+        
+        // GitHub configuration
+        this.owner = 'Joppinger';
+        this.repo = 'Webshop';
+        // PLACEHOLDER: Replace with actual issues-only token
+        this.token = 'placeholder';
     }
 
-    async createOrder(orderData) {
+    async createOrder(orderData, retryCount = 0) {
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 2000; // 2 seconds
+
         const order = {
             id: 'ord_' + Math.random().toString(36).substr(2, 9),
             ...orderData,
@@ -16,7 +25,7 @@ export class OrderManager {
             // GitHub API configuration
             const owner = 'Joppinger'; // Repository owner
             const repo = 'Webshop';   // Repository name
-            const token = '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'; // GitHub personal access token
+            const token = 'placeholdr'; // GitHub personal access token
             const headers = {
                 'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json'
@@ -51,61 +60,87 @@ export class OrderManager {
                     method: 'PUT',
                     headers,
                     body: JSON.stringify({
-                        message: `Create order ${orderNumber}`,
-                        content: btoa(orderContent)
+                        title: `New Order: ${order.id}`,
+                        body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`,
+                        labels: ['order']
                     })
                 }
             );
 
-            // Update counter in GitHub
-            const counterPath = 'docs/orders/counter.txt';
-            const counterContent = orderNumber.toString();
-            
-            try {
-                // Try to get existing file to get its SHA
-                const existingCounter = await fetch(
-                    `https://api.github.com/repos/${owner}/${repo}/contents/${counterPath}`,
-                    { headers }
-                );
-                const counterData = await existingCounter.json();
+            if (!response.ok) {
+                const errorData = await response.json();
+                let errorMessage = 'Failed to create GitHub issue for order';
                 
-                await fetch(
-                    `https://api.github.com/repos/${owner}/${repo}/contents/${counterPath}`,
-                    {
-                        method: 'PUT',
-                        headers,
-                        body: JSON.stringify({
-                            message: `Update counter to ${orderNumber}`,
-                            content: btoa(counterContent),
-                            sha: counterData.sha
-                        })
-                    }
-                );
-            } catch {
-                // File doesn't exist, create it
-                await fetch(
-                    `https://api.github.com/repos/${owner}/${repo}/contents/${counterPath}`,
-                    {
-                        method: 'PUT',
-                        headers,
-                        body: JSON.stringify({
-                            message: `Create counter with value ${orderNumber}`,
-                            content: btoa(counterContent)
-                        })
-                    }
-                );
+                switch (response.status) {
+                    case 401:
+                        errorMessage = 'Authentication failed. Please try again later.';
+                        break;
+                    case 403:
+                        errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
+                        break;
+                    case 422:
+                        errorMessage = 'Invalid order data. Please check your order and try again.';
+                        break;
+                    default:
+                        errorMessage = `GitHub API Error: ${errorData.message || 'Unknown error'}`;
+                }
+                
+                console.error('Order creation failed:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    error: errorData
+                });
+                
+                // Handle rate limiting with retries
+                if (response.status === 403 && retryCount < MAX_RETRIES) {
+                    console.log(`Rate limited, retrying in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                    return this.createOrder(orderData, retryCount + 1);
+                }
+
+                // Handle other transient errors
+                if ([500, 502, 503, 504].includes(response.status) && retryCount < MAX_RETRIES) {
+                    console.log(`Server error, retrying in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                    return this.createOrder(orderData, retryCount + 1);
+                }
+
+                throw new Error(errorMessage);
             }
 
+            const issueData = await response.json();
+
+            // Add order metadata as a comment
+            await fetch(
+                `https://api.github.com/repos/${this.owner}/${this.repo}/issues/${issueData.number}/comments`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${this.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        body: `**Order Details**
+- Created: ${new Date().toLocaleString()}
+- Items: ${order.order.items.length}
+- Total: €${order.order.total.toFixed(2)}
+- Shipping to: ${order.shipping.country}
+- Payment Method: ${order.payment.method}`
+                    })
+                }
+            );
+            
             // Store order info for customer reference
             this.currentOrder = {
                 id: order.id,
-                orderNumber: orderNumber,
+                issueNumber: issueData.number,
                 status: order.status,
                 total: orderData.order.total
             };
             localStorage.setItem('currentOrder', JSON.stringify(this.currentOrder));
             
-            console.log(`Order ${orderNumber} saved to GitHub repository`);
+            console.log(`Order ${order.id} created as GitHub issue #${issueData.number}`);
             return order;
         } catch (error) {
             console.error('Error saving order:', error);

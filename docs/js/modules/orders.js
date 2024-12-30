@@ -47,7 +47,7 @@ export class OrderManager {
 
             // Check if issues are enabled by trying to list them
             const issuesResponse = await fetch(
-                `${API_ENDPOINTS.GITHUB_REPO}/issues?per_page=1`,
+                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues?per_page=1`,
                 {
                     method: 'GET',
                     headers: {

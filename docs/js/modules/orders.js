@@ -17,7 +17,7 @@ export class OrderManager {
             
             // Try to fetch the repository info to check connection
             const response = await fetch(
-                API_ENDPOINTS.GITHUB_REPO,
+                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`,
                 {
                     method: 'GET',
                     headers: {
@@ -119,8 +119,9 @@ export class OrderManager {
         try {
             console.log('Creating order issue...');
             // Create a public issue (no authentication needed)
+            console.log('Creating issue at:', `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`);
             const response = await fetch(
-                `${API_ENDPOINTS.GITHUB_REPO}/issues`,
+                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`,
                 {
                     method: 'POST',
                     headers: {

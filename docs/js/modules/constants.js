@@ -6,8 +6,7 @@ export const GITHUB_CONFIG = {
 
 // API endpoints
 export const API_ENDPOINTS = {
-    GITHUB_API: 'https://api.github.com',
-    GITHUB_REPO: `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`
+    GITHUB_API: 'https://api.github.com'
 };
 
 // Order status constants

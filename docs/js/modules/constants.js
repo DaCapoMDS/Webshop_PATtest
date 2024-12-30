@@ -1,13 +1,28 @@
 // GitHub configuration
 export const GITHUB_CONFIG = {
-    OWNER: 'Joppinger',
-    REPO: 'WebShop'
+    OWNER: 'joppinger',
+    REPO: 'Webshop'
 };
 
 // API endpoints
+const BASE_API_URL = 'https://api.github.com';
+
 export const API_ENDPOINTS = {
-    GITHUB_API: 'https://api.github.com'
+    GITHUB_API: BASE_API_URL,
+    REPO_API: `${BASE_API_URL}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`,
+    ISSUES_API: `${BASE_API_URL}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`
 };
+
+// Debug - log configuration
+console.log('GitHub Config:', {
+    owner: GITHUB_CONFIG.OWNER,
+    repo: GITHUB_CONFIG.REPO
+});
+console.log('API Endpoints:', {
+    base: API_ENDPOINTS.GITHUB_API,
+    repo: API_ENDPOINTS.REPO_API,
+    issues: API_ENDPOINTS.ISSUES_API
+});
 
 // Order status constants
 export const ORDER_STATUS = {

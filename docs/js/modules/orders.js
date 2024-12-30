@@ -14,10 +14,14 @@ export class OrderManager {
         try {
             console.log('Checking GitHub connection...');
             console.log(`Repository: ${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`);
+            console.log('API Base URL:', API_ENDPOINTS.GITHUB_API);
+            
+            const repoUrl = `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`;
+            console.log('Repository URL:', repoUrl);
             
             // Try to fetch the repository info to check connection
             const response = await fetch(
-                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`,
+                API_ENDPOINTS.REPO_API,
                 {
                     method: 'GET',
                     headers: {
@@ -46,8 +50,11 @@ export class OrderManager {
             }
 
             // Check if issues are enabled by trying to list them
+            const issuesUrl = `${API_ENDPOINTS.ISSUES_API}?per_page=1`;
+            console.log('Issues check URL:', issuesUrl);
+            
             const issuesResponse = await fetch(
-                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues?per_page=1`,
+                issuesUrl,
                 {
                     method: 'GET',
                     headers: {
@@ -119,9 +126,16 @@ export class OrderManager {
         try {
             console.log('Creating order issue...');
             // Create a public issue (no authentication needed)
-            console.log('Creating issue at:', `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`);
+            console.log('Creating issue at:', API_ENDPOINTS.ISSUES_API);
+            console.log('Full request details:', {
+                url: API_ENDPOINTS.ISSUES_API,
+                owner: GITHUB_CONFIG.OWNER,
+                repo: GITHUB_CONFIG.REPO,
+                apiBase: API_ENDPOINTS.GITHUB_API
+            });
+            
             const response = await fetch(
-                `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`,
+                API_ENDPOINTS.ISSUES_API,
                 {
                     method: 'POST',
                     headers: {

@@ -26,7 +26,8 @@ export class OrderManager {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': 'Bearer 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'
                     }
                 }
             );
@@ -59,7 +60,8 @@ export class OrderManager {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': 'Bearer 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'
                     }
                 }
             );
@@ -141,7 +143,8 @@ export class OrderManager {
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': 'Bearer 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'
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,

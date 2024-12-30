@@ -1,6 +1,6 @@
 // GitHub configuration
 export const GITHUB_CONFIG = {
-    OWNER: 'joppinger',
+    OWNER: 'Joppinger',
     REPO: 'Webshop'
 };
 

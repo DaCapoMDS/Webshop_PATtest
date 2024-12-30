@@ -14,26 +14,36 @@ export class OrderManager {
 
     async checkGitHubConnection() {
         try {
+            console.log('Checking GitHub connection...');
+            console.log(`Repository: ${this.owner}/${this.repo}`);
+            
             // Try to fetch the repository info to check connection
             const response = await fetch(
                 `https://api.github.com/repos/${this.owner}/${this.repo}`,
                 {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Accept': 'application/vnd.github.v3+json',
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
+
+            console.log('Repository check response:', {
+                status: response.status,
+                statusText: response.statusText
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('GitHub connection check failed:', {
                     status: response.status,
-                    message: errorData.message
+                    message: errorData.message,
+                    documentation_url: errorData.documentation_url
                 });
                 return {
                     success: false,
-                    message: 'Unable to connect to order processing system. Please try again later.'
+                    message: `Unable to connect to order processing system. Status: ${response.status}`
                 };
             }
 
@@ -43,10 +53,16 @@ export class OrderManager {
                 {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Accept': 'application/vnd.github.v3+json',
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
+
+            console.log('Issues check response:', {
+                status: issuesResponse.status,
+                statusText: issuesResponse.statusText
+            });
 
             if (!issuesResponse.ok) {
                 console.error('GitHub issues check failed:', {
@@ -63,6 +79,8 @@ export class OrderManager {
                 remaining: parseInt(response.headers.get('x-ratelimit-remaining')),
                 reset: parseInt(response.headers.get('x-ratelimit-reset'))
             };
+
+            console.log('Rate limit status:', rateLimit);
 
             if (rateLimit.remaining < 10) {
                 const resetDate = new Date(rateLimit.reset * 1000);
@@ -101,6 +119,7 @@ export class OrderManager {
         };
 
         try {
+            console.log('Creating order issue...');
             // Create a public issue (no authentication needed)
             const response = await fetch(
                 `https://api.github.com/repos/${this.owner}/${this.repo}/issues`,
@@ -108,7 +127,8 @@ export class OrderManager {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'KochiWebshop'
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,
@@ -118,8 +138,15 @@ export class OrderManager {
                 }
             );
 
+            console.log('Create issue response:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('Full error response:', errorData);
+                
                 let errorMessage = 'Failed to create order';
                 
                 switch (response.status) {
@@ -128,6 +155,9 @@ export class OrderManager {
                         break;
                     case 403:
                         errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
+                        break;
+                    case 404:
+                        errorMessage = 'Order system not found. Please contact support.';
                         break;
                     case 422:
                         errorMessage = 'Invalid order data. Please check your order and try again.';
@@ -160,6 +190,7 @@ export class OrderManager {
             }
 
             const issueData = await response.json();
+            console.log('Issue created successfully:', issueData);
             
             // Store order info for customer reference
             this.currentOrder = {

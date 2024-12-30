@@ -22,6 +22,33 @@ console.log('Order manager initialized');
 // Make products globally available for other scripts
 window.products = products;
 
+// Add test function for GitHub connection
+window.testGitHubConnection = async function() {
+    try {
+        const result = await window.orderManager.checkGitHubConnection();
+        console.log('GitHub connection test result:', result);
+        alert(result.message);
+    } catch (error) {
+        console.error('GitHub connection test failed:', error);
+        alert('Connection test failed: ' + error.message);
+    }
+};
+
+// Add test button to the page
+document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.querySelector('.navbar-nav');
+    if (nav) {
+        const li = document.createElement('li');
+        li.className = 'nav-item';
+        const button = document.createElement('button');
+        button.className = 'nav-link btn btn-link';
+        button.innerHTML = '<i class="fas fa-sync"></i> Test Connection';
+        button.onclick = window.testGitHubConnection;
+        li.appendChild(button);
+        nav.appendChild(li);
+    }
+});
+
 function changePage(page) {
     console.log('Changing to page:', page);
     currentPage = page;

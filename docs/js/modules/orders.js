@@ -3,16 +3,95 @@ export class OrderManager {
         // Store only current order in localStorage for customer reference
         this.currentOrder = null;
         
-        // GitHub configuration
+        // GitHub repository info
         this.owner = 'Joppinger';
         this.repo = 'Webshop';
-        // PLACEHOLDER: Replace with actual issues-only token
-        this.token = 'placeholder';
+
+        // Constants for retry logic
+        this.MAX_RETRIES = 3;
+        this.RETRY_DELAY = 2000; // 2 seconds
+    }
+
+    async checkGitHubConnection() {
+        try {
+            // Try to fetch the repository info to check connection
+            const response = await fetch(
+                `https://api.github.com/repos/${this.owner}/${this.repo}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('GitHub connection check failed:', {
+                    status: response.status,
+                    message: errorData.message
+                });
+                return {
+                    success: false,
+                    message: 'Unable to connect to order processing system. Please try again later.'
+                };
+            }
+
+            // Also check if we can list issues (needed for order creation)
+            const issuesResponse = await fetch(
+                `https://api.github.com/repos/${this.owner}/${this.repo}/issues?per_page=1`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
+            );
+
+            if (!issuesResponse.ok) {
+                console.error('GitHub issues check failed:', {
+                    status: issuesResponse.status
+                });
+                return {
+                    success: false,
+                    message: 'Order system is currently unavailable. Please try again later.'
+                };
+            }
+
+            // Check rate limit status
+            const rateLimit = {
+                remaining: parseInt(response.headers.get('x-ratelimit-remaining')),
+                reset: parseInt(response.headers.get('x-ratelimit-reset'))
+            };
+
+            if (rateLimit.remaining < 10) {
+                const resetDate = new Date(rateLimit.reset * 1000);
+                const minutes = Math.ceil((resetDate - new Date()) / (1000 * 60));
+                return {
+                    success: false,
+                    message: `Order system is busy. Please try again in ${minutes} minutes.`
+                };
+            }
+
+            return {
+                success: true,
+                message: 'Order system is ready'
+            };
+        } catch (error) {
+            console.error('Error checking GitHub connection:', error);
+            return {
+                success: false,
+                message: 'Cannot connect to order system. Please check your internet connection.'
+            };
+        }
     }
 
     async createOrder(orderData, retryCount = 0) {
-        const MAX_RETRIES = 3;
-        const RETRY_DELAY = 2000; // 2 seconds
+        // First check if GitHub connection is working
+        const connectionCheck = await this.checkGitHubConnection();
+        if (!connectionCheck.success) {
+            throw new Error(connectionCheck.message);
+        }
 
         const order = {
             id: 'ord_' + Math.random().toString(36).substr(2, 9),
@@ -22,43 +101,15 @@ export class OrderManager {
         };
 
         try {
-            // GitHub API configuration
-            const owner = 'Joppinger'; // Repository owner
-            const repo = 'Webshop';   // Repository name
-            const token = 'placeholdr'; // GitHub personal access token
-            const headers = {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
-            };
-
-            // Get current counter from GitHub
-            let orderNumber = 1;
-            try {
-                const counterResponse = await fetch(
-                    `https://api.github.com/repos/${owner}/${repo}/contents/docs/orders/counter.txt`,
-                    { headers }
-                );
-                if (counterResponse.ok) {
-                    const data = await counterResponse.json();
-                    const content = atob(data.content);
-                    orderNumber = parseInt(content.trim()) + 1;
-                }
-            } catch (error) {
-                console.log('Counter not found, starting from 1');
-            }
-
-            // Update order with number
-            order.orderNumber = orderNumber;
-
-            // Save order to GitHub
-            const orderContent = JSON.stringify(order, null, 2);
-            const orderPath = `docs/orders/order_${orderNumber}.json`;
-            
-            await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/contents/${orderPath}`,
+            // Create a public issue (no authentication needed)
+            const response = await fetch(
+                `https://api.github.com/repos/${this.owner}/${this.repo}/issues`,
                 {
-                    method: 'PUT',
-                    headers,
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,
                         body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`,
@@ -69,7 +120,7 @@ export class OrderManager {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                let errorMessage = 'Failed to create GitHub issue for order';
+                let errorMessage = 'Failed to create order';
                 
                 switch (response.status) {
                     case 401:
@@ -82,7 +133,7 @@ export class OrderManager {
                         errorMessage = 'Invalid order data. Please check your order and try again.';
                         break;
                     default:
-                        errorMessage = `GitHub API Error: ${errorData.message || 'Unknown error'}`;
+                        errorMessage = `Error: ${errorData.message || 'Unknown error'}`;
                 }
                 
                 console.error('Order creation failed:', {
@@ -92,16 +143,16 @@ export class OrderManager {
                 });
                 
                 // Handle rate limiting with retries
-                if (response.status === 403 && retryCount < MAX_RETRIES) {
-                    console.log(`Rate limited, retrying in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                if (response.status === 403 && retryCount < this.MAX_RETRIES) {
+                    console.log(`Rate limited, retrying in ${this.RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
                     return this.createOrder(orderData, retryCount + 1);
                 }
 
                 // Handle other transient errors
-                if ([500, 502, 503, 504].includes(response.status) && retryCount < MAX_RETRIES) {
-                    console.log(`Server error, retrying in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                if ([500, 502, 503, 504].includes(response.status) && retryCount < this.MAX_RETRIES) {
+                    console.log(`Server error, retrying in ${this.RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
                     return this.createOrder(orderData, retryCount + 1);
                 }
 
@@ -109,34 +160,14 @@ export class OrderManager {
             }
 
             const issueData = await response.json();
-
-            // Add order metadata as a comment
-            await fetch(
-                `https://api.github.com/repos/${this.owner}/${this.repo}/issues/${issueData.number}/comments`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `token ${this.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        body: `**Order Details**
-- Created: ${new Date().toLocaleString()}
-- Items: ${order.order.items.length}
-- Total: €${order.order.total.toFixed(2)}
-- Shipping to: ${order.shipping.country}
-- Payment Method: ${order.payment.method}`
-                    })
-                }
-            );
             
             // Store order info for customer reference
             this.currentOrder = {
                 id: order.id,
                 issueNumber: issueData.number,
                 status: order.status,
-                total: orderData.order.total
+                total: orderData.order.total,
+                message: 'Your order is being processed. Please wait for confirmation.'
             };
             localStorage.setItem('currentOrder', JSON.stringify(this.currentOrder));
             

@@ -74,50 +74,18 @@ window.checkout = async function() {
     checkoutBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
     try {
-        // Silently validate GitHub integration
-        const response = await fetch(
-            `https://api.github.com/repos/Joppinger/Webshop/issues`,
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `token ${window.orderManager.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: '[VALIDATION] System Check',
-                    body: 'Validating order system functionality.',
-                    labels: ['test']
-                })
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Order system validation failed');
+        // Check GitHub connection before proceeding
+        const connectionStatus = await window.orderManager.checkGitHubConnection();
+        
+        if (!connectionStatus.success) {
+            throw new Error(connectionStatus.message);
         }
-
-        // Close the test issue immediately
-        const issueData = await response.json();
-        await fetch(
-            `https://api.github.com/repos/Joppinger/Webshop/issues/${issueData.number}`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${window.orderManager.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    state: 'closed'
-                })
-            }
-        );
 
         // If we get here, the validation was successful
         window.location.href = './checkout.html';
     } catch (error) {
         console.error('Order system validation failed:', error);
-        alert('Sorry, the order system is temporarily unavailable. Please try again later.');
+        alert(error.message || 'Sorry, the order system is temporarily unavailable. Please try again later.');
     } finally {
         // Restore checkout button state
         checkoutBtn.disabled = false;

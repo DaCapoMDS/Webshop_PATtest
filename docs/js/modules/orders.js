@@ -25,9 +25,9 @@ export class OrderManager {
                 {
                     method: 'GET',
                     headers: {
+                        'Authorization': 'token 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',
                         'Accept': 'application/vnd.github+json',
-                        'User-Agent': 'KochiWebshop',
-                        'Authorization': 'token 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'
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
@@ -59,9 +59,9 @@ export class OrderManager {
                 {
                     method: 'GET',
                     headers: {
+                        'Authorization': 'token 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',
                         'Accept': 'application/vnd.github+json',
-                        'User-Agent': 'KochiWebshop',
-                        'Authorization': 'token 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'
+                        'User-Agent': 'KochiWebshop'
                     }
                 }
             );
@@ -141,10 +141,10 @@ export class OrderManager {
                 {
                     method: 'POST',
                     headers: {
+                        'Authorization': 'token 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',
                         'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json',
                         'User-Agent': 'KochiWebshop',
-                        'Authorization': 'token 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'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,

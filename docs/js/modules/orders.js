@@ -1,11 +1,9 @@
+import { GITHUB_CONFIG, API_ENDPOINTS, ORDER_STATUS, ERROR_MESSAGES } from './constants.js';
+
 export class OrderManager {
     constructor() {
         // Store only current order in localStorage for customer reference
         this.currentOrder = null;
-        
-        // GitHub repository info
-        this.owner = 'Joppinger';
-        this.repo = 'Webshop';
 
         // Constants for retry logic
         this.MAX_RETRIES = 3;
@@ -15,16 +13,17 @@ export class OrderManager {
     async checkGitHubConnection() {
         try {
             console.log('Checking GitHub connection...');
-            console.log(`Repository: ${this.owner}/${this.repo}`);
+            console.log(`Repository: ${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`);
             
             // Try to fetch the repository info to check connection
             const response = await fetch(
-                `https://api.github.com/repos/${this.owner}/${this.repo}`,
+                API_ENDPOINTS.GITHUB_REPO,
                 {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
                     }
                 }
             );
@@ -43,18 +42,19 @@ export class OrderManager {
                 });
                 return {
                     success: false,
-                    message: `Unable to connect to order processing system. Status: ${response.status}`
+                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
                 };
             }
 
             // Also check if we can list issues (needed for order creation)
             const issuesResponse = await fetch(
-                `https://api.github.com/repos/${this.owner}/${this.repo}/issues?per_page=1`,
+                `${API_ENDPOINTS.GITHUB_REPO}/issues?per_page=1`,
                 {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
                     }
                 }
             );
@@ -70,7 +70,7 @@ export class OrderManager {
                 });
                 return {
                     success: false,
-                    message: 'Order system is currently unavailable. Please try again later.'
+                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
                 };
             }
 
@@ -87,7 +87,7 @@ export class OrderManager {
                 const minutes = Math.ceil((resetDate - new Date()) / (1000 * 60));
                 return {
                     success: false,
-                    message: `Order system is busy. Please try again in ${minutes} minutes.`
+                    message: ERROR_MESSAGES.RATE_LIMIT.replace('{minutes}', minutes)
                 };
             }
 
@@ -99,7 +99,7 @@ export class OrderManager {
             console.error('Error checking GitHub connection:', error);
             return {
                 success: false,
-                message: 'Cannot connect to order system. Please check your internet connection.'
+                message: ERROR_MESSAGES.CONNECTION_ERROR
             };
         }
     }
@@ -114,21 +114,22 @@ export class OrderManager {
         const order = {
             id: 'ord_' + Math.random().toString(36).substr(2, 9),
             ...orderData,
-            status: 'pending',
+            status: ORDER_STATUS.PENDING,
             createdAt: new Date().toISOString()
         };
 
         try {
             console.log('Creating order issue...');
-            // Create a public issue (no authentication needed)
+            // Create issue with authentication
             const response = await fetch(
-                `https://api.github.com/repos/${this.owner}/${this.repo}/issues`,
+                `${API_ENDPOINTS.GITHUB_REPO}/issues`,
                 {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json',
-                        'User-Agent': 'KochiWebshop'
+                        'User-Agent': 'KochiWebshop',
+                        'Authorization': `token ${GITHUB_CONFIG.PUBLIC_TOKEN}`
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,
@@ -147,20 +148,19 @@ export class OrderManager {
                 const errorData = await response.json();
                 console.error('Full error response:', errorData);
                 
-                let errorMessage = 'Failed to create order';
-                
+                let errorMessage;
                 switch (response.status) {
                     case 401:
-                        errorMessage = 'Authentication failed. Please try again later.';
+                        errorMessage = ERROR_MESSAGES.AUTH_FAILED;
                         break;
                     case 403:
-                        errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
+                        errorMessage = ERROR_MESSAGES.RATE_LIMIT.replace('{minutes}', '5');
                         break;
                     case 404:
-                        errorMessage = 'Order system not found. Please contact support.';
+                        errorMessage = ERROR_MESSAGES.SYSTEM_UNAVAILABLE;
                         break;
                     case 422:
-                        errorMessage = 'Invalid order data. Please check your order and try again.';
+                        errorMessage = ERROR_MESSAGES.INVALID_ORDER;
                         break;
                     default:
                         errorMessage = `Error: ${errorData.message || 'Unknown error'}`;

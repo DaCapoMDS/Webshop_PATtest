@@ -24,13 +24,43 @@ window.products = products;
 
 // Add test function for GitHub connection
 window.testGitHubConnection = async function() {
+    const testBtn = document.querySelector('#test-connection-btn');
+    const originalText = testBtn.innerHTML;
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+
     try {
         const result = await window.orderManager.checkGitHubConnection();
         console.log('GitHub connection test result:', result);
-        alert(result.message);
+        
+        if (result.success) {
+            testBtn.className = 'nav-link btn btn-link text-success';
+            testBtn.innerHTML = '<i class="fas fa-check"></i> System Ready';
+            setTimeout(() => {
+                testBtn.className = 'nav-link btn btn-link';
+                testBtn.innerHTML = originalText;
+                testBtn.disabled = false;
+            }, 3000);
+        } else {
+            testBtn.className = 'nav-link btn btn-link text-danger';
+            testBtn.innerHTML = '<i class="fas fa-times"></i> System Error';
+            alert(result.message);
+            setTimeout(() => {
+                testBtn.className = 'nav-link btn btn-link';
+                testBtn.innerHTML = originalText;
+                testBtn.disabled = false;
+            }, 3000);
+        }
     } catch (error) {
         console.error('GitHub connection test failed:', error);
+        testBtn.className = 'nav-link btn btn-link text-danger';
+        testBtn.innerHTML = '<i class="fas fa-times"></i> System Error';
         alert('Connection test failed: ' + error.message);
+        setTimeout(() => {
+            testBtn.className = 'nav-link btn btn-link';
+            testBtn.innerHTML = originalText;
+            testBtn.disabled = false;
+        }, 3000);
     }
 };
 
@@ -41,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.className = 'nav-item';
         const button = document.createElement('button');
+        button.id = 'test-connection-btn';
         button.className = 'nav-link btn btn-link';
         button.innerHTML = '<i class="fas fa-sync"></i> Test Connection';
         button.onclick = window.testGitHubConnection;

@@ -14,31 +14,20 @@ export class OrderManager {
         try {
             console.log('Checking order system connection...');
             
-            // Try new orders endpoint first
-            try {
-                const response = await fetch(API_ENDPOINTS.ORDERS_API, {
-                    method: 'HEAD',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    console.log('Order system check successful (new endpoint)');
-                    return {
-                        success: true,
-                        message: 'Order system is ready'
-                    };
-                }
-            } catch (error) {
-                console.log('New endpoint check failed, trying legacy endpoint...');
+            const token = localStorage.getItem('github_token');
+            if (!token) {
+                console.error('GitHub token not found');
+                return {
+                    success: false,
+                    message: ERROR_MESSAGES.AUTH_FAILED
+                };
             }
 
-            // Fall back to legacy issues endpoint
-            const response = await fetch(API_ENDPOINTS.ISSUES_API, {
+            const response = await fetch(API_ENDPOINTS.ORDERS_API, {
                 method: 'HEAD',
                 headers: {
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
@@ -46,11 +35,11 @@ export class OrderManager {
                 console.error('Order system check failed:', response.status);
                 return {
                     success: false,
-                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
+                    message: response.status === 401 ? ERROR_MESSAGES.AUTH_FAILED : ERROR_MESSAGES.SYSTEM_UNAVAILABLE
                 };
             }
 
-            console.log('Order system check successful (legacy endpoint)');
+            console.log('Order system check successful');
             return {
                 success: true,
                 message: 'Order system is ready'
@@ -71,6 +60,11 @@ export class OrderManager {
             throw new Error(connectionCheck.message);
         }
 
+        const token = localStorage.getItem('github_token');
+        if (!token) {
+            throw new Error(ERROR_MESSAGES.AUTH_FAILED);
+        }
+
         const order = {
             id: 'ord_' + Math.random().toString(36).substr(2, 9),
             ...orderData,
@@ -81,42 +75,18 @@ export class OrderManager {
         try {
             console.log('Creating order...');
             
-            // Try the new orders endpoint first, fall back to issues if it fails
-            let response;
-            try {
-                response = await fetch(
-                    API_ENDPOINTS.ORDERS_API,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(order)
-                    }
-                );
-                
-                // If order endpoint fails with 404 (not deployed yet), fall back to issues
-                if (response.status === 404) {
-                    throw new Error('Order endpoint not available');
+            const response = await fetch(
+                API_ENDPOINTS.ORDERS_API,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(order)
                 }
-            } catch (error) {
-                console.log('New order endpoint failed, falling back to issues:', error);
-                response = await fetch(
-                    API_ENDPOINTS.ISSUES_API,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            title: `New Order: ${order.id}`,
-                            body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`
-                        })
-                    }
-                );
-            }
+            );
 
             console.log('Create order response:', {
                 status: response.status,
@@ -161,20 +131,20 @@ export class OrderManager {
                 throw new Error(errorMessage);
             }
 
-            const issueData = await response.json();
-            console.log('Order created successfully:', issueData);
+            const responseData = await response.json();
+            console.log('Order created successfully:', responseData);
             
             // Store order info for customer reference
             this.currentOrder = {
                 id: order.id,
-                issueNumber: issueData.number,
+                orderNumber: responseData.order.orderNumber,
                 status: order.status,
                 total: orderData.order.total,
-                message: 'Your order is being processed. Please wait for confirmation.'
+                message: 'Your order has been created and is being processed.'
             };
             localStorage.setItem('currentOrder', JSON.stringify(this.currentOrder));
             
-            console.log(`Order ${order.id} created as GitHub issue #${issueData.number}`);
+            console.log(`Order ${order.id} created with number ${responseData.order.orderNumber}`);
             return order;
         } catch (error) {
             console.error('Error saving order:', error);

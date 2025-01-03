@@ -5,7 +5,7 @@ export const GITHUB_CONFIG = {
 };
 
 // API endpoints
-const VERCEL_API_URL = 'https://webshop-pattest-git-main-dacapos-projects.vercel.app';
+const VERCEL_API_URL = 'https://webshop-pattest.vercel.app';
 
 export const API_ENDPOINTS = {
     ISSUES_API: `${VERCEL_API_URL}/api/create-issue`,

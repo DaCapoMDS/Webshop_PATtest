@@ -57,19 +57,40 @@ export class OrderManager {
         try {
             console.log('Creating order...');
             
-            const response = await fetch(
-                API_ENDPOINTS.ISSUES_API,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: `New Order: ${order.id}`,
-                        body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`
-                    })
+            // Try the new orders endpoint first, fall back to issues if it fails
+            let response;
+            try {
+                response = await fetch(
+                    API_ENDPOINTS.ORDERS_API,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(order)
+                    }
+                );
+                
+                // If order endpoint fails with 404 (not deployed yet), fall back to issues
+                if (response.status === 404) {
+                    throw new Error('Order endpoint not available');
                 }
-            );
+            } catch (error) {
+                console.log('New order endpoint failed, falling back to issues:', error);
+                response = await fetch(
+                    API_ENDPOINTS.ISSUES_API,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: `New Order: ${order.id}`,
+                            body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`
+                        })
+                    }
+                );
+            }
 
             console.log('Create order response:', {
                 status: response.status,

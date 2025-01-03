@@ -14,6 +14,24 @@ export class OrderManager {
         try {
             console.log('Checking order system connection...');
             
+            // Try new orders endpoint first
+            try {
+                const response = await fetch(API_ENDPOINTS.ORDERS_API, {
+                    method: 'HEAD'
+                });
+
+                if (response.ok) {
+                    console.log('Order system check successful (new endpoint)');
+                    return {
+                        success: true,
+                        message: 'Order system is ready'
+                    };
+                }
+            } catch (error) {
+                console.log('New endpoint check failed, trying legacy endpoint...');
+            }
+
+            // Fall back to legacy issues endpoint
             const response = await fetch(API_ENDPOINTS.ISSUES_API, {
                 method: 'HEAD'
             });
@@ -26,7 +44,7 @@ export class OrderManager {
                 };
             }
 
-            console.log('Order system check successful');
+            console.log('Order system check successful (legacy endpoint)');
             return {
                 success: true,
                 message: 'Order system is ready'

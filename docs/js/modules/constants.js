@@ -8,7 +8,8 @@ export const GITHUB_CONFIG = {
 const VERCEL_API_URL = 'https://kochiswebshop-jw2zljr1s-dacapos-projects.vercel.app';
 
 export const API_ENDPOINTS = {
-    ISSUES_API: `${VERCEL_API_URL}/api/create-issue`
+    ISSUES_API: `${VERCEL_API_URL}/api/create-issue`,
+    ORDERS_API: `${VERCEL_API_URL}/api/create-order`
 };
 
 // Debug - log configuration

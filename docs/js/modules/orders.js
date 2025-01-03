@@ -17,7 +17,12 @@ export class OrderManager {
             // Try new orders endpoint first
             try {
                 const response = await fetch(API_ENDPOINTS.ORDERS_API, {
-                    method: 'HEAD'
+                    method: 'HEAD',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
 
                 if (response.ok) {
@@ -33,7 +38,12 @@ export class OrderManager {
 
             // Fall back to legacy issues endpoint
             const response = await fetch(API_ENDPOINTS.ISSUES_API, {
-                method: 'HEAD'
+                method: 'HEAD',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
 
             if (!response.ok) {
@@ -82,8 +92,11 @@ export class OrderManager {
                     API_ENDPOINTS.ORDERS_API,
                     {
                         method: 'POST',
+                        mode: 'cors',
+                        credentials: 'include',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify(order)
                     }
@@ -99,8 +112,11 @@ export class OrderManager {
                     API_ENDPOINTS.ISSUES_API,
                     {
                         method: 'POST',
+                        mode: 'cors',
+                        credentials: 'include',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({
                             title: `New Order: ${order.id}`,

@@ -29,7 +29,25 @@ module.exports = async (req, res) => {
 
   // Handle HEAD requests after token verification
   if (req.method === 'HEAD') {
-    res.status(200).end();
+    // For HEAD requests, just verify we can connect to GitHub API
+    try {
+      const response = await fetch('https://api.github.com/repos/DaCapoMDS/Webshop_PATtest', {
+        method: 'HEAD',
+        headers: {
+          'Authorization': `token ${process.env.GITHUB_API_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'KochiWebshop'
+        }
+      });
+      
+      if (response.ok) {
+        res.status(200).end();
+      } else {
+        res.status(response.status).end();
+      }
+    } catch (error) {
+      res.status(500).end();
+    }
     return;
   }
 

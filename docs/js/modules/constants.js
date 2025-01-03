@@ -1,11 +1,11 @@
 // GitHub configuration
 export const GITHUB_CONFIG = {
-    OWNER: 'joppinger',
-    REPO: 'Webshop'
+    OWNER: 'DaCapoMDS',
+    REPO: 'Webshop_PATtest'
 };
 
 // API endpoints
-const VERCEL_API_URL = 'https://webshop-pattest.vercel.app';
+const VERCEL_API_URL = 'https://webshop-pattest-git-main-dacapos-projects.vercel.app';
 
 export const API_ENDPOINTS = {
     ISSUES_API: `${VERCEL_API_URL}/api/create-issue`,

@@ -18,8 +18,6 @@ export class OrderManager {
             try {
                 const response = await fetch(API_ENDPOINTS.ORDERS_API, {
                     method: 'HEAD',
-                    mode: 'cors',
-                    credentials: 'include',
                     headers: {
                         'Accept': 'application/json'
                     }
@@ -39,8 +37,6 @@ export class OrderManager {
             // Fall back to legacy issues endpoint
             const response = await fetch(API_ENDPOINTS.ISSUES_API, {
                 method: 'HEAD',
-                mode: 'cors',
-                credentials: 'include',
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -92,8 +88,6 @@ export class OrderManager {
                     API_ENDPOINTS.ORDERS_API,
                     {
                         method: 'POST',
-                        mode: 'cors',
-                        credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
@@ -112,8 +106,6 @@ export class OrderManager {
                     API_ENDPOINTS.ISSUES_API,
                     {
                         method: 'POST',
-                        mode: 'cors',
-                        credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'

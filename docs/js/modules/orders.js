@@ -15,9 +15,18 @@ export class OrderManager {
             console.log('Checking order system connection...');
             
             const response = await fetch(API_ENDPOINTS.ISSUES_API, {
-                method: 'OPTIONS'
+                method: 'HEAD'
             });
 
+            if (!response.ok) {
+                console.error('Order system check failed:', response.status);
+                return {
+                    success: false,
+                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
+                };
+            }
+
+            console.log('Order system check successful');
             return {
                 success: true,
                 message: 'Order system is ready'

@@ -5,12 +5,10 @@ export const GITHUB_CONFIG = {
 };
 
 // API endpoints
-const BASE_API_URL = 'https://api.github.com';
+const VERCEL_API_URL = 'https://kochiswebshop-2l9rjd910-dacapos-projects.vercel.app';
 
 export const API_ENDPOINTS = {
-    GITHUB_API: BASE_API_URL,
-    REPO_API: `${BASE_API_URL}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`,
-    ISSUES_API: `${BASE_API_URL}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/issues`
+    ISSUES_API: `${VERCEL_API_URL}/api/create-issue`
 };
 
 // Debug - log configuration

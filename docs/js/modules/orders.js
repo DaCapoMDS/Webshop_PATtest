@@ -12,98 +12,18 @@ export class OrderManager {
 
     async checkGitHubConnection() {
         try {
-            console.log('Checking GitHub connection...');
-            console.log(`Repository: ${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`);
-            console.log('API Base URL:', API_ENDPOINTS.GITHUB_API);
+            console.log('Checking order system connection...');
             
-            const repoUrl = `${API_ENDPOINTS.GITHUB_API}/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`;
-            console.log('Repository URL:', repoUrl);
-            
-            // Try to fetch the repository info to check connection
-            const response = await fetch(
-                API_ENDPOINTS.REPO_API,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': 'token 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',
-                        'Accept': 'application/vnd.github+json',
-                        'User-Agent': 'KochiWebshop'
-                    }
-                }
-            );
-
-            console.log('Repository check response:', {
-                status: response.status,
-                statusText: response.statusText
+            const response = await fetch(API_ENDPOINTS.ISSUES_API, {
+                method: 'OPTIONS'
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('GitHub connection check failed:', {
-                    status: response.status,
-                    message: errorData.message,
-                    documentation_url: errorData.documentation_url
-                });
-                return {
-                    success: false,
-                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
-                };
-            }
-
-            // Check if issues are enabled by trying to list them
-            const issuesUrl = `${API_ENDPOINTS.ISSUES_API}?per_page=1`;
-            console.log('Issues check URL:', issuesUrl);
-            
-            const issuesResponse = await fetch(
-                issuesUrl,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': 'token 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',
-                        'Accept': 'application/vnd.github+json',
-                        'User-Agent': 'KochiWebshop'
-                    }
-                }
-            );
-
-            console.log('Issues check response:', {
-                status: issuesResponse.status,
-                statusText: issuesResponse.statusText
-            });
-
-            if (!issuesResponse.ok) {
-                console.error('GitHub issues check failed:', {
-                    status: issuesResponse.status
-                });
-                return {
-                    success: false,
-                    message: ERROR_MESSAGES.SYSTEM_UNAVAILABLE
-                };
-            }
-
-            // Check rate limit status
-            const rateLimit = {
-                remaining: parseInt(response.headers.get('x-ratelimit-remaining')),
-                reset: parseInt(response.headers.get('x-ratelimit-reset'))
-            };
-
-            console.log('Rate limit status:', rateLimit);
-
-            if (rateLimit.remaining < 10) {
-                const resetDate = new Date(rateLimit.reset * 1000);
-                const minutes = Math.ceil((resetDate - new Date()) / (1000 * 60));
-                return {
-                    success: false,
-                    message: ERROR_MESSAGES.RATE_LIMIT.replace('{minutes}', minutes)
-                };
-            }
 
             return {
                 success: true,
                 message: 'Order system is ready'
             };
         } catch (error) {
-            console.error('Error checking GitHub connection:', error);
+            console.error('Error checking order system connection:', error);
             return {
                 success: false,
                 message: ERROR_MESSAGES.CONNECTION_ERROR
@@ -112,7 +32,7 @@ export class OrderManager {
     }
 
     async createOrder(orderData, retryCount = 0) {
-        // First check if GitHub connection is working
+        // First check if order system connection is working
         const connectionCheck = await this.checkGitHubConnection();
         if (!connectionCheck.success) {
             throw new Error(connectionCheck.message);
@@ -126,35 +46,23 @@ export class OrderManager {
         };
 
         try {
-            console.log('Creating order issue...');
-            // Create a public issue (no authentication needed)
-            console.log('Creating issue at:', API_ENDPOINTS.ISSUES_API);
-            console.log('Full request details:', {
-                url: API_ENDPOINTS.ISSUES_API,
-                owner: GITHUB_CONFIG.OWNER,
-                repo: GITHUB_CONFIG.REPO,
-                apiBase: API_ENDPOINTS.GITHUB_API
-            });
+            console.log('Creating order...');
             
             const response = await fetch(
                 API_ENDPOINTS.ISSUES_API,
                 {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'token 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',
-                        'Accept': 'application/vnd.github+json',
-                        'User-Agent': 'KochiWebshop',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         title: `New Order: ${order.id}`,
-                        body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`,
-                        labels: ['order']
+                        body: `ORDER_DATA:\n${JSON.stringify(order, null, 2)}\nEND_ORDER_DATA`
                     })
                 }
             );
 
-            console.log('Create issue response:', {
+            console.log('Create order response:', {
                 status: response.status,
                 statusText: response.statusText
             });
@@ -187,14 +95,7 @@ export class OrderManager {
                     error: errorData
                 });
                 
-                // Handle rate limiting with retries
-                if (response.status === 403 && retryCount < this.MAX_RETRIES) {
-                    console.log(`Rate limited, retrying in ${this.RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
-                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
-                    return this.createOrder(orderData, retryCount + 1);
-                }
-
-                // Handle other transient errors
+                // Handle server errors with retries
                 if ([500, 502, 503, 504].includes(response.status) && retryCount < this.MAX_RETRIES) {
                     console.log(`Server error, retrying in ${this.RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
                     await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
@@ -205,7 +106,7 @@ export class OrderManager {
             }
 
             const issueData = await response.json();
-            console.log('Issue created successfully:', issueData);
+            console.log('Order created successfully:', issueData);
             
             // Store order info for customer reference
             this.currentOrder = {

@@ -12,7 +12,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "https://dacapomds.github.io" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS, HEAD" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Accept" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Accept, Authorization" }
       ]
     }
   ],

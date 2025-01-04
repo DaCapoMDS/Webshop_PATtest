@@ -1,12 +1,7 @@
-vjklvconst fetch = require('node-fetch');
+const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://dacapomds.github.io');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
-
-  // Handle preflight and HEAD requests
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -23,7 +18,6 @@ module.exports = async (req, res) => {
 
   // Handle HEAD requests after token verification
   if (req.method === 'HEAD') {
-    // For HEAD requests, just verify we can connect to GitHub API
     try {
       const response = await fetch('https://api.github.com/repos/DaCapoMDS/Webshop_PATtest', {
         method: 'HEAD',
@@ -37,9 +31,11 @@ module.exports = async (req, res) => {
       if (response.ok) {
         res.status(200).end();
       } else {
+        console.error('GitHub API check failed:', response.status);
         res.status(response.status).end();
       }
     } catch (error) {
+      console.error('GitHub API check error:', error);
       res.status(500).end();
     }
     return;
@@ -75,6 +71,7 @@ module.exports = async (req, res) => {
     );
 
     if (!counterResponse.ok) {
+      console.error('Failed to read counter:', counterResponse.status);
       throw new Error('Failed to read order counter');
     }
 
@@ -85,7 +82,8 @@ module.exports = async (req, res) => {
     // Prepare the order with number
     const order = {
       ...orderData,
-      orderNumber: newCounter
+      orderNumber: newCounter,
+      createdAt: new Date().toISOString()
     };
 
     // Create the order file
@@ -108,6 +106,7 @@ module.exports = async (req, res) => {
     );
 
     if (!orderResponse.ok) {
+      console.error('Failed to create order file:', orderResponse.status);
       throw new Error('Failed to create order file');
     }
 
@@ -131,6 +130,7 @@ module.exports = async (req, res) => {
     );
 
     if (!counterUpdateResponse.ok) {
+      console.error('Failed to update counter:', counterUpdateResponse.status);
       throw new Error('Failed to update counter');
     }
 
